@@ -12,14 +12,29 @@ function ret = tgprintf(varargin)
 % Please refer the following post 
 % "Creating a Telegram bot for personal notifications"
 % https://www.forsomedefinition.com/automation/creating-telegram-bot-notifications/
-% 
-% Seongsik Park
+%
+% Seongsik Park 2017
 % seongsikpark@postech.ac.kr
+% Paul L. Smits 2019
+% paul.l.smits@gmail.com
 
-% default token and chat_id
-token = DEFAULT_TOKEN_HERE
-chat_id = DEFAULT_CHAT_ID_HERE;
-
+% Load or create mat file containing token and chat_id
+authfn='authfile.mat';
+if exist(authfn, 'file')
+    filecontent = load(authfn);
+    token   = filecontent.token;
+    chat_id = filecontent.chat_id;
+    clear filecontent
+else
+    fprintf('tgprintf did not find an authfile, creating one \n');
+    token   = input('Telegram bot token as provided by BotFather: ','s');
+    response= webread(['https://api.telegram.org/bot' token '/getUpdates']);
+    exampl= [response.result(end).message.chat.first_name ' has id ' num2str(response.result(end).message.chat.id)];
+    chat_id = input(['Telegram chat id (chat ' exampl '): '],'s');
+    clear response exampl
+    save(authfn, 'token','chat_id')
+end
+    
 str = sprintf(varargin{:});
 
 % print to MATLAB command window
